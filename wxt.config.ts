@@ -11,6 +11,7 @@ export default defineConfig({
     default_locale: "en",
     permissions: [
       "storage",
+      "unlimitedStorage",
       "alarms",
       "webNavigation",
     ],

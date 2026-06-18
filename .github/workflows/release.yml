@@ -14,7 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -38,40 +37,18 @@ jobs:
           cd output/chrome-mv3
           zip -r ../../memeify-thumbnail-chrome.zip .
 
-      - name: Install Chrome for CRX signing
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq google-chrome-stable 2>/dev/null || true
-          # 备用：装 Chromium 也行
-          which google-chrome || which chromium-browser || which chromium || echo "No Chrome available"
-
-      - name: Sign Chrome CRX
+      - name: Create Chrome CRX3
         env:
           CRX_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
         run: |
-          # 写入密钥
           printf '%s\n' "$CRX_KEY" > crx-key.pem
           chmod 600 crx-key.pem
-
-          # 找到 Chrome 路径
-          CHROME=$(which google-chrome 2>/dev/null || which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo "")
-          if [ -n "$CHROME" ]; then
-            echo "Using Chrome: $CHROME"
-            "$CHROME" --pack-extension="$(pwd)/output/chrome-mv3" \
-                      --pack-extension-key="$(pwd)/crx-key.pem" \
-                      --no-message-box 2>/dev/null || true
-            # Chrome 会把 .crx 放到输出目录的上一级
-            if [ -f output/chrome-mv3.crx ]; then
-              mv output/chrome-mv3.crx memeify-thumbnail-chrome.crx
-            fi
-          fi
-
-          # 验证
-          if [ -f memeify-thumbnail-chrome.crx ]; then
-            echo "CRX created: $(wc -c < memeify-thumbnail-chrome.crx) bytes"
-          else
-            echo "CRX not created, will upload ZIP only"
-          fi
+          npx -y crx3@latest \
+            -c output/chrome-mv3 \
+            -p crx-key.pem \
+            -o memeify-thumbnail-chrome.crx 2>&1 || {
+            echo "crx3 failed, skipping CRX"
+          }
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
