@@ -1,0 +1,16 @@
+node_modules/
+output/
+.wxt/
+dist/
+*.log
+.DS_Store
+
+# Chrome CRX signing key — 不要提交！
+memeify-crx-key.pem
+memeify-crx-key.pub
+crx-key.pem
+
+# Build artifacts
+*.crx
+*.xpi
+*.zip

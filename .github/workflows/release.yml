@@ -1,0 +1,58 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Chrome extension
+        run: npx wxt build -b chrome
+
+      - name: Build Firefox extension
+        run: npx wxt build -b firefox
+
+      - name: Prepare Chrome CRX signing key
+        run: |
+          echo "${{ secrets.CRX_PRIVATE_KEY }}" > crx-key.pem
+          chmod 600 crx-key.pem
+
+      - name: Install crx3
+        run: npm install -g crx3
+
+      - name: Package Chrome CRX
+        run: |
+          crx3 -c output/chrome-mv3 -p crx-key.pem -o memeify-thumbnail-chrome.crx
+
+      - name: Package Firefox XPI
+        run: |
+          cd output/firefox-mv2 && zip -r ../../memeify-thumbnail-firefox.xpi . && cd ../..
+
+      - name: Package Chrome ZIP (for Web Store)
+        run: |
+          cd output/chrome-mv3 && zip -r ../../memeify-thumbnail-chrome.zip . && cd ../..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            memeify-thumbnail-chrome.crx
+            memeify-thumbnail-firefox.xpi
+            memeify-thumbnail-chrome.zip
+          generate_release_notes: true

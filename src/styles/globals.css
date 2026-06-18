@@ -1,0 +1,812 @@
+/* ============================================================
+   HajimariUI
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ─── Theme Variables ─── */
+
+:root {
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --bg: hsl(0, 0%, 100%);
+    --fg: hsl(0, 0%, 10%);
+    --card-bg: hsl(0, 0%, 100%);
+    --card-fg: hsl(0, 0%, 10%);
+    --popover: hsl(0, 0%, 100%);
+    --popover-fg: hsl(0, 0%, 10%);
+    --secondary: hsl(0, 0%, 95%);
+    --secondary-fg: hsl(0, 0%, 15%);
+    --muted: hsl(0, 0%, 91%);
+    --muted-fg: hsl(0, 0%, 40%);
+    --accent: hsl(0, 0%, 94%);
+    --accent-fg: hsl(0, 0%, 15%);
+    --destructive: hsl(0, 72%, 51%);
+    --destructive-fg: hsl(0, 0%, 98%);
+    --border: hsl(0, 0%, 87%);
+    --input: hsl(0, 0%, 87%);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    --radius: 0.625rem;
+}
+
+.dark {
+    --bg: hsl(240, 4%, 8%);
+    --fg: hsl(0, 0%, 95%);
+    --card-bg: hsl(240, 5%, 12%);
+    --card-fg: hsl(0, 0%, 95%);
+    --popover: hsl(240, 5%, 12%);
+    --popover-fg: hsl(0, 0%, 95%);
+    --secondary: hsl(240, 5%, 16%);
+    --secondary-fg: hsl(0, 0%, 95%);
+    --muted: hsl(240, 5%, 16%);
+    --muted-fg: hsl(240, 2%, 70%);
+    --accent: hsl(240, 5%, 16%);
+    --accent-fg: hsl(0, 0%, 95%);
+    --destructive: hsl(0, 62%, 40%);
+    --destructive-fg: hsl(0, 0%, 98%);
+    --border: hsl(240, 5%, 16%);
+    --input: hsl(240, 5%, 16%);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Accent CSS (injected via JS, but defaults here) ─── */
+
+:root {
+    --hue: 48;
+    --primary: oklch(0.68 0.16 var(--hue, 48));
+    --primary-fg: oklch(0.99 0 0);
+    --ring: oklch(0.6 0.16 var(--hue, 48));
+    --blob: oklch(0.65 0.16 var(--hue, 48) / 0.3);
+}
+
+.dark {
+    --primary: oklch(0.72 0.14 var(--hue, 48));
+    --ring: oklch(0.65 0.14 var(--hue, 48));
+    --blob: oklch(0.6 0.14 var(--hue, 48) / 0.25);
+}
+
+/* ─── Tailwind Theme Extension ─── */
+
+@theme inline {
+    --color-background: var(--bg);
+    --color-foreground: var(--fg);
+    --color-card: var(--card-bg);
+    --color-card-foreground: var(--card-fg);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-fg);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-fg);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-fg);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-fg);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-fg);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-fg);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-mono);
+    --radius: var(--radius);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ─── Base ─── */
+
+@layer base {
+    *,
+    *::before,
+    *::after {
+        border-color: var(--border);
+    }
+
+    html {
+        font-size: 16px;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-sans);
+        min-height: 100vh;
+        overflow-x: hidden;
+        transition:
+            background-color 0.3s,
+            color 0.3s;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    /* ─── Popup-specific overrides ─── */
+    body.popup-open {
+        font-size: 0.8125rem;
+    }
+
+    body::before,
+    body::after {
+        content: "";
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        z-index: 0;
+        pointer-events: none;
+        transition: opacity 0.5s;
+    }
+
+    body::before {
+        width: 500px;
+        height: 500px;
+        top: -150px;
+        left: -120px;
+        background: radial-gradient(circle, var(--blob), transparent 70%);
+    }
+
+    body::after {
+        width: 550px;
+        height: 550px;
+        bottom: -180px;
+        right: -130px;
+        background: radial-gradient(circle, var(--blob), transparent 70%);
+        opacity: 0.6;
+    }
+
+    /* Popup: much smaller blobs to match the small viewport */
+    body.popup-open::before {
+        width: 120px;
+        height: 120px;
+        top: -40px;
+        left: -30px;
+        filter: blur(30px);
+    }
+
+    body.popup-open::after {
+        width: 140px;
+        height: 140px;
+        bottom: -40px;
+        right: -30px;
+        filter: blur(30px);
+        opacity: 0.5;
+    }
+
+    .material-symbols-rounded {
+        line-height: 1;
+        display: inline-flex;
+        vertical-align: middle;
+    }
+
+    ::selection {
+        background: var(--primary);
+        color: var(--primary-fg);
+        border-radius: 4px;
+    }
+}
+
+/* ─── Page Layout (Options) ─── */
+
+.options-page {
+    position: relative;
+    z-index: 10;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.options-header {
+    margin-bottom: 28px;
+}
+
+.options-header h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+
+.options-header p {
+    font-size: 0.85rem;
+    color: var(--muted-fg);
+}
+
+/* ─── Tabs ─── */
+
+.tabs-bar {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 10px 18px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted-fg);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        color 0.15s,
+        border-color 0.15s;
+}
+
+.tab-btn:hover {
+    color: var(--fg);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ─── Cards ─── */
+
+.settings-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+}
+
+.settings-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.settings-card-desc {
+    font-size: 0.76rem;
+    color: var(--muted-fg);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+/* ─── Form Controls ─── */
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    gap: 16px;
+}
+
+.setting-row + .setting-row {
+    border-top: 1px solid var(--border);
+}
+
+.setting-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-label-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.setting-label-desc {
+    font-size: 0.72rem;
+    color: var(--muted-fg);
+    margin-top: 2px;
+}
+
+.setting-control {
+    flex-shrink: 0;
+}
+
+/* ─── Toggle Switch (shadcn-style) ─── */
+
+.toggle-switch {
+    position: relative;
+    display: inline-flex;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--muted);
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    padding: 0;
+}
+
+.toggle-switch.on {
+    background: var(--primary);
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch.on .toggle-thumb {
+    transform: translateX(18px);
+}
+
+/* ─── Select ─── */
+
+.select-input {
+    padding: 6px 30px 6px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--fg);
+    font-size: 0.78rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 120px;
+}
+
+.select-input:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px oklch(0.68 0.16 var(--hue, 48) / 0.15);
+}
+
+/* ─── Text Input ─── */
+
+.text-input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--fg);
+    font-size: 0.82rem;
+    font-family: var(--font-sans);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px oklch(0.68 0.16 var(--hue, 48) / 0.15);
+}
+
+.text-input::placeholder {
+    color: var(--muted-fg);
+}
+
+/* ─── Buttons ─── */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--fg);
+    transition:
+        border-color 0.15s,
+        background 0.15s,
+        transform 0.15s;
+}
+
+.btn:hover {
+    border-color: var(--ring);
+    background: var(--secondary);
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--primary-fg);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    border-color: var(--primary);
+}
+
+.btn-destructive {
+    border-color: var(--destructive);
+    color: var(--destructive);
+}
+
+.btn-destructive:hover {
+    background: var(--destructive);
+    color: var(--destructive-fg);
+    border-color: var(--destructive);
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.74rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── Badge ─── */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: var(--secondary);
+    color: var(--secondary-fg);
+}
+
+.badge-primary {
+    background: var(--primary);
+    color: var(--primary-fg);
+}
+
+/* ─── Pack Card ─── */
+
+.pack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.pack-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition:
+        border-color 0.2s,
+        transform 0.2s;
+}
+
+.pack-card:hover {
+    border-color: var(--ring);
+    transform: translateY(-2px);
+}
+
+.pack-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pack-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--secondary);
+}
+
+.pack-card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+}
+
+.pack-card-meta {
+    font-size: 0.7rem;
+    color: var(--muted-fg);
+    font-family: var(--font-mono);
+}
+
+.pack-card-body {
+    padding: 12px 14px;
+}
+
+.pack-card-desc {
+    font-size: 0.76rem;
+    color: var(--muted-fg);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pack-card-actions {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px 12px;
+    flex-wrap: wrap;
+}
+
+.pack-card-active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+/* ─── Animations ─── */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeIn 0.35s ease forwards;
+}
+
+/* ─── Toast ─── */
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+}
+
+.toast-message {
+    background: var(--card-bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.82rem;
+    box-shadow:
+        var(--shadow),
+        0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(12px);
+    animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ─── Scrollbar ─── */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-fg);
+}
+
+/* ─── Progress Bar ─── */
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--secondary);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+/* ─── Empty State ─── */
+
+.empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted-fg);
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.empty-state-desc {
+    font-size: 0.76rem;
+}
+
+/* ============================================================
+   View Transitions（主题切换圆圈扩散）
+   ============================================================ */
+
+@keyframes vt-circle-in {
+    from {
+        clip-path: circle(
+            0% at var(--vt-origin-x, 50%) var(--vt-origin-y, 50%)
+        );
+    }
+    to {
+        clip-path: circle(
+            150% at var(--vt-origin-x, 50%) var(--vt-origin-y, 50%)
+        );
+    }
+}
+@keyframes vt-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+::view-transition-old(root) {
+    animation: vt-fade-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+::view-transition-new(root) {
+    animation: vt-circle-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ============================================================
+   HajimariUI Animations
+   ============================================================ */
+
+/* ─── Reveal (fade up) ─── */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: revealUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards paused;
+}
+.reveal.d1 {
+    animation-delay: 80ms;
+}
+.reveal.d2 {
+    animation-delay: 0.2s;
+}
+.reveal.d3 {
+    animation-delay: 0.31s;
+}
+.reveal.d4 {
+    animation-delay: 0.43s;
+}
+.reveal.d5 {
+    animation-delay: 0.54s;
+}
+@keyframes revealUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Toast entrance ─── */
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ─── Spin ─── */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─── Background blob sway ─── */
+body::before {
+    animation: blobSway1 14s ease-in-out infinite;
+}
+body::after {
+    animation: blobSway2 18s ease-in-out infinite;
+}
+@keyframes blobSway1 {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(45px, -35px) scale(1.08);
+    }
+    50% {
+        transform: translate(-20px, 28px) scale(0.92);
+    }
+    75% {
+        transform: translate(-40px, -15px) scale(1.05);
+    }
+}
+@keyframes blobSway2 {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(-40px, 35px) scale(1.09);
+    }
+    50% {
+        transform: translate(28px, -25px) scale(0.91);
+    }
+    75% {
+        transform: translate(35px, 15px) scale(1.07);
+    }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+    body::before,
+    body::after {
+        animation: none;
+    }
+}
+
+/* ─── Loading bar ─── */
+.memeify-loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+}
