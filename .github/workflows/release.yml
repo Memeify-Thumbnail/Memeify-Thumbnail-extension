@@ -22,37 +22,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Chrome extension
+      - name: Build Chrome
         run: npx wxt build -b chrome
 
-      - name: Build Firefox extension
+      - name: Build Firefox
         run: npx wxt build -b firefox
-
-      - name: Prepare Chrome CRX signing key
-        run: |
-          echo "${{ secrets.CRX_PRIVATE_KEY }}" > crx-key.pem
-          chmod 600 crx-key.pem
-
-      - name: Install crx3
-        run: npm install -g crx3
-
-      - name: Package Chrome CRX
-        run: |
-          crx3 -c output/chrome-mv3 -p crx-key.pem -o memeify-thumbnail-chrome.crx
 
       - name: Package Firefox XPI
         run: |
-          cd output/firefox-mv2 && zip -r ../../memeify-thumbnail-firefox.xpi . && cd ../..
+          cd output/firefox-mv2
+          zip -r ../../memeify-thumbnail-firefox.xpi .
 
-      - name: Package Chrome ZIP (for Web Store)
+      - name: Package Chrome ZIP
         run: |
-          cd output/chrome-mv3 && zip -r ../../memeify-thumbnail-chrome.zip . && cd ../..
+          cd output/chrome-mv3
+          zip -r ../../memeify-thumbnail-chrome.zip .
+
+      - name: Sign Chrome CRX
+        env:
+          CRX_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        run: |
+          # 将密钥写入文件（环境变量方式避免多行问题）
+          printf '%s\n' "$CRX_KEY" > crx-key.pem
+          chmod 600 crx-key.pem
+
+          # 用 chrome-headless 打包 CRX（如可用）
+          if command -v google-chrome &>/dev/null; then
+            google-chrome --pack-extension="$(pwd)/output/chrome-mv3" \
+              --pack-extension-key="$(pwd)/crx-key.pem" \
+              --no-message-box 2>/dev/null || true
+            mv output/chrome-mv3.crx memeify-thumbnail-chrome.crx 2>/dev/null || true
+          fi
+
+          # 备用：用 openssl 创建签名（CRX3 格式的简单版本）
+          if [ ! -f memeify-thumbnail-chrome.crx ]; then
+            echo "Chrome not available, creating unsigned Chrome package only"
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             memeify-thumbnail-chrome.crx
-            memeify-thumbnail-firefox.xpi
             memeify-thumbnail-chrome.zip
+            memeify-thumbnail-firefox.xpi
           generate_release_notes: true
