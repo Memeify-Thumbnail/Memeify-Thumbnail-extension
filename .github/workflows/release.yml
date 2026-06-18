@@ -27,35 +27,18 @@ jobs:
       - name: Build Firefox
         run: npx wxt build -b firefox
 
-      - name: Package Firefox XPI
-        run: |
-          cd output/firefox-mv2
-          zip -r ../../memeify-thumbnail-firefox.xpi .
-
       - name: Package Chrome ZIP
         run: |
-          cd output/chrome-mv3
-          zip -r ../../memeify-thumbnail-chrome.zip .
+          cd output/chrome-mv3 && zip -r ../../memeify-thumbnail-chrome.zip .
 
-      - name: Create Chrome CRX3
-        env:
-          CRX_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+      - name: Package Firefox XPI
         run: |
-          printf '%s\n' "$CRX_KEY" > crx-key.pem
-          chmod 600 crx-key.pem
-          npx -y crx3@latest \
-            -c output/chrome-mv3 \
-            -p crx-key.pem \
-            -o memeify-thumbnail-chrome.crx 2>&1 || {
-            echo "crx3 failed, skipping CRX"
-          }
+          cd output/firefox-mv2 && zip -r ../../memeify-thumbnail-firefox.xpi .
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            memeify-thumbnail-chrome.crx
             memeify-thumbnail-chrome.zip
             memeify-thumbnail-firefox.xpi
-          fail_on_unmatched_files: false
           generate_release_notes: true
