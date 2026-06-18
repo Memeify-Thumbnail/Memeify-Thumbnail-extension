@@ -38,25 +38,39 @@ jobs:
           cd output/chrome-mv3
           zip -r ../../memeify-thumbnail-chrome.zip .
 
+      - name: Install Chrome for CRX signing
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq google-chrome-stable 2>/dev/null || true
+          # 备用：装 Chromium 也行
+          which google-chrome || which chromium-browser || which chromium || echo "No Chrome available"
+
       - name: Sign Chrome CRX
         env:
           CRX_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
         run: |
-          # 将密钥写入文件（环境变量方式避免多行问题）
+          # 写入密钥
           printf '%s\n' "$CRX_KEY" > crx-key.pem
           chmod 600 crx-key.pem
 
-          # 用 chrome-headless 打包 CRX（如可用）
-          if command -v google-chrome &>/dev/null; then
-            google-chrome --pack-extension="$(pwd)/output/chrome-mv3" \
-              --pack-extension-key="$(pwd)/crx-key.pem" \
-              --no-message-box 2>/dev/null || true
-            mv output/chrome-mv3.crx memeify-thumbnail-chrome.crx 2>/dev/null || true
+          # 找到 Chrome 路径
+          CHROME=$(which google-chrome 2>/dev/null || which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo "")
+          if [ -n "$CHROME" ]; then
+            echo "Using Chrome: $CHROME"
+            "$CHROME" --pack-extension="$(pwd)/output/chrome-mv3" \
+                      --pack-extension-key="$(pwd)/crx-key.pem" \
+                      --no-message-box 2>/dev/null || true
+            # Chrome 会把 .crx 放到输出目录的上一级
+            if [ -f output/chrome-mv3.crx ]; then
+              mv output/chrome-mv3.crx memeify-thumbnail-chrome.crx
+            fi
           fi
 
-          # 备用：用 openssl 创建签名（CRX3 格式的简单版本）
-          if [ ! -f memeify-thumbnail-chrome.crx ]; then
-            echo "Chrome not available, creating unsigned Chrome package only"
+          # 验证
+          if [ -f memeify-thumbnail-chrome.crx ]; then
+            echo "CRX created: $(wc -c < memeify-thumbnail-chrome.crx) bytes"
+          else
+            echo "CRX not created, will upload ZIP only"
           fi
 
       - name: Create Release
@@ -66,4 +80,5 @@ jobs:
             memeify-thumbnail-chrome.crx
             memeify-thumbnail-chrome.zip
             memeify-thumbnail-firefox.xpi
+          fail_on_unmatched_files: false
           generate_release_notes: true
